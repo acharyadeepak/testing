@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Workshop;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Database\Eloquent\Model;
 
 class EventsController extends BaseController
 {
     public function getWarmupEvents() {
-        return Event::all();
+		$event_data= Event::with('workshops')->get()->toArray();
+		return response()->json($event_data,200);
     }
 
     /*
@@ -101,6 +104,9 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
+		
+		$event_data= Event::with('workshops')->get()->toArray();
+		return response()->json($event_data,200);
         throw new \Exception('implement in coding task 1');
     }
 
