@@ -10,7 +10,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Database\Eloquent\Model;
-
+use DB;
 class EventsController extends BaseController
 {
     public function getWarmupEvents() {
@@ -104,7 +104,6 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
-		
 		$event_data= Event::with('workshops')->get()->toArray();
 		return response()->json($event_data,200);
         throw new \Exception('implement in coding task 1');
@@ -186,6 +185,27 @@ class EventsController extends BaseController
      */
 
     public function getFutureEventsWithWorkshops() {
+		$event_data = DB::table('events')
+		->select(['workshops.id as w_id','workshops.name as w_name','workshops.start','workshops.end','workshops.event_id','workshops.created_at as w_created_at','workshops.updated_at as w_updated_at',
+		'events.*'])
+		->leftJoin('workshops', 'events.id', '=', 'workshops.event_id')
+		->where('workshops.start' , '>=' , date('Y-m-d 00:00:00'))
+		->get()->toArray();
+		$new_data = [];
+		foreach($event_data as $eventData) {
+			$new_data[$eventData->id]['id'] = $eventData->id;
+			$new_data[$eventData->id]['name'] = $eventData->name;
+			$new_data[$eventData->id]['created_at'] = $eventData->created_at;
+			$new_data[$eventData->id]['updated_at'] = $eventData->updated_at;
+			$new_data[$eventData->id]['workshops']['id'] = $eventData->w_id;
+			$new_data[$eventData->id]['workshops']['name'] = $eventData->w_name;
+			$new_data[$eventData->id]['workshops']['start'] = $eventData->start;
+			$new_data[$eventData->id]['workshops']['end'] = $eventData->end;
+			$new_data[$eventData->id]['workshops']['event_id'] = $eventData->event_id;
+			$new_data[$eventData->id]['workshops']['created_at'] = $eventData->w_created_at;
+			$new_data[$eventData->id]['workshops']['updated_at'] = $eventData->w_updated_at;
+		}
+		return response()->json($new_data,200);
         throw new \Exception('implement in coding task 2');
     }
 }
